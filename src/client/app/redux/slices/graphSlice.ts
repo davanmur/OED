@@ -40,6 +40,7 @@ const defaultState: GraphState = {
 		meterOrGroup: undefined,
 		readingInterval: ReadingInterval.Hourly
 	},
+	selectedMap: 0,
 	hotlinked: false
 };
 
@@ -230,6 +231,9 @@ export const graphSlice = createSlice({
 				}
 			}
 		},
+		updateSelectedMap: state => {
+			state.current.selectedMap = 2;
+		},
 		resetTimeInterval: state => {
 			if (!state.current.queryTimeInterval.equals(TimeInterval.unbounded())) {
 				state.current.queryTimeInterval = TimeInterval.unbounded();
@@ -319,6 +323,9 @@ export const graphSlice = createSlice({
 							case 'groupIDs':
 								current.selectedGroups = value.split(',').map(s => parseInt(s));
 								break;
+							case 'mapID':
+								current.selectedMap = parseInt(value);
+								break;
 							case 'meterIDs':
 								current.selectedMeters = value.split(',').map(s => parseInt(s));
 								break;
@@ -388,6 +395,7 @@ export const graphSlice = createSlice({
 		selectGraphAreaNormalization: state => state.current.areaNormalization,
 		selectThreeDMeterOrGroupID: state => state.current.threeD.meterOrGroupID,
 		selectThreeDReadingInterval: state => state.current.threeD.readingInterval,
+		selectMap: state => state.current.selectedMap,
 		selectDefaultGraphState: () => defaultState,
 		selectHistoryIsDirty: state => state.prev.length > 0 || state.next.length > 0,
 		selectSliderRangeInterval: state => state.current.rangeSliderInterval,
@@ -411,7 +419,7 @@ export const {
 	selectGraphAreaNormalization, selectSliderRangeInterval,
 	selectDefaultGraphState, selectHistoryIsDirty,
 	selectPlotlySliderMax, selectPlotlySliderMin,
-	selectMapBarWidthDays
+	selectMapBarWidthDays, selectMap
 } = graphSlice.selectors;
 
 // actionCreators exports
@@ -428,6 +436,7 @@ export const {
 	toggleAreaNormalization, updateThreeDMeterOrGroup,
 	changeCompareSortingOrder, updateThreeDMeterOrGroupID,
 	updateThreeDReadingInterval, updateThreeDMeterOrGroupInfo,
-	updateSelectedMetersOrGroups, updateMapsBarDuration
+	updateSelectedMetersOrGroups, updateMapsBarDuration,
+	updateSelectedMap
 } = graphSlice.actions;
 

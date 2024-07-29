@@ -140,8 +140,8 @@ export const selectCompareChartQueryArgs = createSelector(
 export const selectMapChartQueryArgs = createSelector(
 	selectBarChartQueryArgs,
 	selectMapBarWidthDays,
-	(state: RootState) => state.maps,
-	(barChartArgs, barWidthDays, maps) => {
+	(state: RootState) => state.graph,
+	(barChartArgs, barWidthDays, graph) => {
 		const durationDays = Math.round(barWidthDays.asDays());
 
 		const meterArgs: MapReadingApiArgs = {
@@ -155,8 +155,8 @@ export const selectMapChartQueryArgs = createSelector(
 			barWidthDays: durationDays
 
 		};
-		const meterShouldSkip = barChartArgs.meterShouldSkip || maps.selectedMap === 0;
-		const groupShouldSkip = barChartArgs.groupShouldSkip || maps.selectedMap === 0;
+		const meterShouldSkip = barChartArgs.meterShouldSkip || graph.selectedMap === 0;
+		const groupShouldSkip = barChartArgs.groupShouldSkip || graph.selectedMap === 0;
 		return { meterArgs, groupArgs, meterShouldSkip, groupShouldSkip };
 	}
 

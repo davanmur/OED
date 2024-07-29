@@ -35,8 +35,8 @@ export default function MapChartSelectComponent() {
 	)), 'label');
 
 	const selectedMap = {
-		label: useSelector((state: State) => state.maps.byMapID[state.maps.selectedMap] ? state.maps.byMapID[state.maps.selectedMap].name : ''),
-		value: useSelector((state: State) => state.maps.selectedMap)
+		label: useSelector((state: State) => state.maps.byMapID[state.graph.selectedMap] ? state.maps.byMapID[state.graph.selectedMap].name : ''),
+		value: useSelector((state: State) => state.graph.selectedMap)
 	};
 
 	//useIntl instead of injectIntl and WrappedComponentProps

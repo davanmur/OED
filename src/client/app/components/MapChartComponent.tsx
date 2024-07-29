@@ -57,7 +57,7 @@ export default function MapChartComponent() {
 
 	// RTK Types Disagree with maps ts types so, use old until migration completer for maps.
 	// This is also an issue when trying to refactor maps reducer into slice.
-	const selectedMap = useSelector((state: State) => state.maps.selectedMap);
+	const selectedMap = useSelector((state: State) => state.graph.selectedMap);
 	const byMapID = useSelector((state: State) => state.maps.byMapID);
 	const editedMaps = useSelector((state: State) => state.maps.editedMaps);
 	if (meterIsFetching || groupIsFetching) {
