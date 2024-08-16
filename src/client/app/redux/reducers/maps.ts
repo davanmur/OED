@@ -37,11 +37,6 @@ export default function maps(state = defaultState, action: MapsAction) {
 					}
 				}
 			};
-		case ActionType.UpdateSelectedMap:
-			return {
-				...state,
-				selectedMap: action.mapID
-			};
 		case ActionType.RequestMapsDetails:
 			return {
 				...state,

@@ -436,7 +436,7 @@ export const selectChartLink = createAppSelector(
 		selectGraphState,
 		selectChartLinkHideOptions,
 		selectSliderRangeInterval,
-		state => state.maps.selectedMap
+		state => state.graph.current.selectedMap
 	],
 	(current, chartLinkHideOptions, rangeSliderInterval, selectedMap) => {
 		// Determine the beginning of the URL to add arguments to.

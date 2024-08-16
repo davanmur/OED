@@ -34,7 +34,7 @@ function submitMapEdits(mapID: number): t.SubmitEditedMapAction {
 }
 
 function confirmMapEdits(mapID: number): t.ConfirmEditedMapAction {
-	return { type: ActionType.ConfirmEditedMap, mapID};
+	return { type: ActionType.ConfirmEditedMap, mapID };
 }
 
 export function fetchMapsDetails(): Thunk {
@@ -114,13 +114,13 @@ export function updateMapMode(nextMode: CalibrationModeTypes): t.ChangeMapModeAc
 	return { type: ActionType.UpdateCalibrationMode, nextMode };
 }
 
-/**
- * Changes the selected map ID
- * @param newSelectedMapID new map ID
- */
-export function changeSelectedMap(newSelectedMapID: number): t.UpdateSelectedMapAction {
-	return { type: ActionType.UpdateSelectedMap, mapID: newSelectedMapID };
-}
+// /**
+//  * Changes the selected map ID
+//  * @param newSelectedMapID new map ID
+//  */
+// export function changeSelectedMap(newSelectedMapID: number): t.UpdateSelectedMapAction {
+// 	return { type: ActionType.UpdateSelectedMap, mapID: newSelectedMapID };
+// }
 
 export function updateCurrentCartesian(currentCartesian: CartesianPoint): t.UpdateCurrentCartesianAction {
 	return { type: ActionType.UpdateCurrentCartesian, currentCartesian };

@@ -140,7 +140,7 @@ export const selectCompareChartQueryArgs = createSelector(
 export const selectMapChartQueryArgs = createSelector(
 	selectBarChartQueryArgs,
 	selectMapBarWidthDays,
-	(state: RootState) => state.graph,
+	(state: RootState) => state.graph.current,
 	(barChartArgs, barWidthDays, graph) => {
 		const durationDays = Math.round(barWidthDays.asDays());
 
