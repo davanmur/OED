@@ -71,9 +71,9 @@ mocha.describe('Obvius API', () => {
 				//should respond with 406, not acceptable
 				expect(res).to.have.status(406);
 				//should also return expected message
-				expect(res.text).equals(`<pre>\nRequest must include mode parameter.\n</pre>\n`); 
+				expect(res.text).equals(`<pre>\nRequest must include mode parameter.\n</pre>\n`);
 			});
-			mocha.it('should accept status requests', async function ()  {
+			mocha.it('should accept status requests', async () => {
 				const conn = testDB.getConnection();
 				const password = 'password';
 				const hashedPassword = await bcrypt.hash(password, 10);
@@ -85,106 +85,108 @@ mocha.describe('Obvius API', () => {
 				//should respond with 200, success
 				expect(res).to.have.status(200);
 				//should also return expected message
-				expect(res.text).equals("<pre>\nSUCCESS\n</pre>\n"); 
+				expect(res.text).equals("<pre>\nSUCCESS\n</pre>\n");
 			});
-			mocha.it('should accept valid logfile uploads', async function () {
-				this.timeout(30000);
-		
+			mocha.it('should accept valid logfile uploads', async () => {
+				//PromiseRejectionHandledWarning originates here
 				const conn = testDB.getConnection();
 				const password = 'password';
 				const hashedPassword = await bcrypt.hash(password, 10);
 				const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
 				await obviusUser.insert(conn);
 				obviusUser.password = password;
-				const requestMode = 'LOGFILEUPLOAD';
-		
+				const logfileRequestMode = 'LOGFILEUPLOAD';
+				const configFileRequestMode = 'CONFIGFILEUPLOAD';
+
 				// Adapted from ../obvius/README.md
 				const logfilePath = 'src/server/test/web/obvius/mb-001.log.gz';
-				
+				const configFilePath = 'src/server/test/web/obvius/mb-001.ini.gz';
+
+
+				//the upload of a logfile is the subject of the test
 				const res = await chai.request(app)
-						.post('/api/obvius')
-						.field('username', obviusUser.username)
-						.field('password', obviusUser.password)
-						.field('mode', requestMode)
-						.field('serialnumber', 'mb-001')
-						.attach('files', logfilePath);
-		
+					.post('/api/obvius')
+					.field('username', obviusUser.username)
+					.field('password', obviusUser.password)
+					.field('mode', logfileRequestMode)
+					.field('serialnumber', 'mb-001')
+					.attach('files', logfilePath);
+
 				//should respond with 200, success
 				expect(res).to.have.status(200);
 				//should also return expected message
-				expect(res.text).equals("<pre>\nSUCCESS\nLogfile Upload IS PROVISIONAL</pre>\n"); 
-				});
-				mocha.it('should accept valid config file uploads', async function () {
-					this.timeout(30000);
-			
-					const conn = testDB.getConnection();
-					const password = 'password';
-					const hashedPassword = await bcrypt.hash(password, 10);
-					const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
-					await obviusUser.insert(conn);
-					obviusUser.password = password;
-					const requestMode = 'CONFIGFILEUPLOAD';
-			
-					// Adapted from ../obvius/README.md
-					const configFilePath = 'src/server/test/web/obvius/mb-001.ini.gz';
-					
-					const res = await chai.request(app)
-							.post('/api/obvius')
-							.field('username', obviusUser.username)
-							.field('password', obviusUser.password)
-							.field('mode', requestMode)
-							.field('serialnumber', 'mb-001')
-							.field('modbusdevice', '1234')
-							.attach('files', configFilePath);
+				expect(res.text).equals("<pre>\nSUCCESS\nLogfile Upload IS PROVISIONAL</pre>\n");
 
-					//should respond with 200, success
-					expect(res).to.have.status(200);
-					//should also return expected message
-					expect(res.text).equals("<pre>\nSUCCESS\nAcquired config log with (pseudo)filename mb-001-mb-1234.ini.</pre>\n"); 
-					});
-				mocha.it('should return accurate config file manifests', async function () {
-					this.timeout(30000);
-			
-					const conn = testDB.getConnection();
-					const password = 'password';
-					const hashedPassword = await bcrypt.hash(password, 10);
-					const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
-					await obviusUser.insert(conn);
-					obviusUser.password = password;
-					const uploadRequestMode = 'CONFIGFILEUPLOAD';
-					const manifestRequestMode = 'CONFIGFILEMANIFEST';
-			
-					// Adapted from ../obvius/README.md
-					const configFilePath = 'src/server/test/web/obvius/mb-001.ini.gz';
-					
-					const upload = await chai.request(app)
-							.post('/api/obvius')
-							.field('username', obviusUser.username)
-							.field('password', obviusUser.password)
-							.field('mode', uploadRequestMode)
-							.field('serialnumber', 'mb-001')
-							.field('modbusdevice', '1234')
-							.attach('files', configFilePath);
-			
-					const res = await chai.request(app)
-							.post('/api/obvius')
-							.field('username', obviusUser.username)
-							.field('password', obviusUser.password)
-							.field('mode', manifestRequestMode);
+			});
+			mocha.it('should accept valid config file uploads', async () => {
+				const conn = testDB.getConnection();
+				const password = 'password';
+				const hashedPassword = await bcrypt.hash(password, 10);
+				const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
+				await obviusUser.insert(conn);
+				obviusUser.password = password;
+				const requestMode = 'CONFIGFILEUPLOAD';
 
-					//should respond with 200, success
-					expect(res).to.have.status(200);
+				// Adapted from ../obvius/README.md
+				const configFilePath = 'src/server/test/web/obvius/mb-001.ini.gz';
 
-					//get "all" config files to compare to response
-					const allConfigfiles = await Configfile.getAll(conn);
-					let response = '';
-					for (f of allConfigfiles) {
-						response += `CONFIGFILE,${f.makeFilename()},${f.hash},${f.created.format('YYYY-MM-DD hh:mm:ss')}`;
-					}
+				const res = await chai.request(app)
+					.post('/api/obvius')
+					.field('username', obviusUser.username)
+					.field('password', obviusUser.password)
+					.field('mode', requestMode)
+					.field('serialnumber', 'mb-001')
+					.field('modbusdevice', '1234')
+					.attach('files', configFilePath);
 
-					//the third line of the response should be the config file
-					expect(res.text.split("\n")[2]).equals(response);
-					});
+				//should respond with 200, success
+				expect(res).to.have.status(200);
+				//should also return expected message
+				expect(res.text).equals("<pre>\nSUCCESS\nAcquired config log with (pseudo)filename mb-001-mb-1234.ini.</pre>\n");
+			});
+			mocha.it('should return accurate config file manifests', async () => {
+				const conn = testDB.getConnection();
+				const password = 'password';
+				const hashedPassword = await bcrypt.hash(password, 10);
+				const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
+				await obviusUser.insert(conn);
+				obviusUser.password = password;
+				const uploadRequestMode = 'CONFIGFILEUPLOAD';
+				const manifestRequestMode = 'CONFIGFILEMANIFEST';
+
+				// Adapted from ../obvius/README.md
+				const configFilePath = 'src/server/test/web/obvius/mb-001.ini.gz';
+				const upload = await chai.request(app)
+					.post('/api/obvius')
+					.field('username', obviusUser.username)
+					.field('password', obviusUser.password)
+					.field('mode', uploadRequestMode)
+					.field('serialnumber', 'mb-001')
+					.field('modbusdevice', '1234')
+					.attach('files', configFilePath);
+
+				const res = await chai.request(app)
+					.post('/api/obvius')
+					.field('username', obviusUser.username)
+					.field('password', obviusUser.password)
+					.field('mode', manifestRequestMode);
+
+				//logfile upload should respond with 200, success
+				expect(upload).to.have.status(200);
+
+				//logfile request should respond with 200, success
+				expect(res).to.have.status(200);
+
+				//get "all" config files to compare to response
+				const allConfigfiles = await Configfile.getAll(conn);
+				let response = '';
+				for (f of allConfigfiles) {
+					response += `CONFIGFILE,${f.makeFilename()},${f.hash},${f.created.format('YYYY-MM-DD hh:mm:ss')}`;
+				}
+
+				//the third line of the response should be the config file
+				expect(res.text.split("\n")[2]).equals(response);
+			});
 		});
 	});
 });
