@@ -9,6 +9,8 @@ const { chai, mocha, expect, app, testDB, testUser } = require('../common');
 const User = require('../../models/User');
 const Configfile = require('../../models/obvius/Configfile');
 const bcrypt = require('bcryptjs');
+const { insertUnits } = require('../../util/insertData');
+const Unit = require('../../models/Unit');
 
 mocha.describe('Obvius API', () => {
 	mocha.describe('upload: ', () => {
@@ -60,8 +62,25 @@ mocha.describe('Obvius API', () => {
 			}
 		});
 		mocha.describe('obvius request modes', async () => {
-			mocha.it('should reject requests without a mode', async () => {
+			mocha.beforeEach(async () => {
 				const conn = testDB.getConnection();
+				// The kWh unit is not used in all tests but easier to just put in.
+				const unitData = [
+					{
+						name: 'kWh',
+						identifier: '',
+						unitRepresent: Unit.unitRepresentType.QUANTITY,
+						secInRate: 3600,
+						typeOfUnit: Unit.unitType.UNIT,
+						suffix: '',
+						displayable: Unit.displayableType.ALL,
+						preferredDisplay: true,
+						note: 'OED created standard unit'
+					}
+				];
+				await insertUnits(unitData, false, conn);
+			});
+			mocha.it('should reject requests without a mode', async () => {
 				const password = 'password';
 				const hashedPassword = await bcrypt.hash(password, 10);
 				const obviusUser = new User(undefined, 'obivus@example.com', hashedPassword, User.role.OBVIUS);
@@ -74,7 +93,6 @@ mocha.describe('Obvius API', () => {
 				expect(res.text).equals(`<pre>\nRequest must include mode parameter.\n</pre>\n`);
 			});
 			mocha.it('should accept status requests', async () => {
-				const conn = testDB.getConnection();
 				const password = 'password';
 				const hashedPassword = await bcrypt.hash(password, 10);
 				const obviusUser = new User(undefined, 'obivus@example.com', hashedPassword, User.role.OBVIUS);
@@ -88,20 +106,15 @@ mocha.describe('Obvius API', () => {
 				expect(res.text).equals("<pre>\nSUCCESS\n</pre>\n");
 			});
 			mocha.it('should accept valid logfile uploads', async () => {
-				//PromiseRejectionHandledWarning originates here
-				const conn = testDB.getConnection();
 				const password = 'password';
 				const hashedPassword = await bcrypt.hash(password, 10);
 				const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
 				await obviusUser.insert(conn);
 				obviusUser.password = password;
 				const logfileRequestMode = 'LOGFILEUPLOAD';
-				const configFileRequestMode = 'CONFIGFILEUPLOAD';
 
 				// Adapted from ../obvius/README.md
 				const logfilePath = 'src/server/test/web/obvius/mb-001.log.gz';
-				const configFilePath = 'src/server/test/web/obvius/mb-001.ini.gz';
-
 
 				//the upload of a logfile is the subject of the test
 				const res = await chai.request(app)
@@ -111,7 +124,6 @@ mocha.describe('Obvius API', () => {
 					.field('mode', logfileRequestMode)
 					.field('serialnumber', 'mb-001')
 					.attach('files', logfilePath);
-
 				//should respond with 200, success
 				expect(res).to.have.status(200);
 				//should also return expected message
@@ -119,7 +131,6 @@ mocha.describe('Obvius API', () => {
 
 			});
 			mocha.it('should accept valid config file uploads', async () => {
-				const conn = testDB.getConnection();
 				const password = 'password';
 				const hashedPassword = await bcrypt.hash(password, 10);
 				const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
@@ -145,7 +156,6 @@ mocha.describe('Obvius API', () => {
 				expect(res.text).equals("<pre>\nSUCCESS\nAcquired config log with (pseudo)filename mb-001-mb-1234.ini.</pre>\n");
 			});
 			mocha.it('should return accurate config file manifests', async () => {
-				const conn = testDB.getConnection();
 				const password = 'password';
 				const hashedPassword = await bcrypt.hash(password, 10);
 				const obviusUser = new User(undefined, 'obvius@example.com', hashedPassword, User.role.OBVIUS);
