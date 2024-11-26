@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { cloneDeep, isEqual } from 'lodash';
+import * as moment from 'moment';
 import * as React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Button, Input } from 'reactstrap';
@@ -18,7 +19,6 @@ import TimeZoneSelect from '../TimeZoneSelect';
 import { defaultAdminState } from '../../redux/slices/adminSlice';
 
 
-// TODO: Add warning for invalid data
 /**
  * @returns Preferences Component for Administrative use
  */
@@ -41,6 +41,40 @@ export default function PreferencesComponent() {
 
 	const discardChanges = () => {
 		setLocalAdminPref(cloneDeep(adminPreferences));
+	};
+
+	// small functions that determine if fields are invalid to warn the user
+	const invalidReadingFreq = () => {
+		const frequency = moment.duration(localAdminPref.defaultMeterReadingFrequency);
+		return !frequency.isValid() || frequency.asSeconds() <= 0;
+	};
+
+	// force check some localAdminPref values as numbers, they are stored as strings
+	const invalidValueLimits = () => {
+		return Number(localAdminPref.defaultMeterMinimumValue) >= Number(localAdminPref.defaultMeterMaximumValue);
+	};
+
+	const invalidDateLimits = () => {
+		const minMoment = moment(localAdminPref.defaultMeterMinimumDate);
+		const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
+		return !minMoment.isValid() || !maxMoment.isValid() || !minMoment.isBefore(maxMoment);
+	};
+
+	const invalidReadingGap = () => {
+		return Number(localAdminPref.defaultMeterReadingGap) < 0;
+	};
+
+	const invalidMeterErrors = () => {
+		return Number(localAdminPref.defaultMeterMaximumErrors) <= 0;
+	};
+
+	const invalidFileSizeLimit = () => {
+		return Number(localAdminPref.defaultFileSizeLimit) < 0;
+	};
+
+	const invalidWarningFileSize = () => {
+		return Number(localAdminPref.defaultWarningFileSize) < 0
+			|| Number(localAdminPref.defaultWarningFileSize) > Number(localAdminPref.defaultFileSizeLimit);
 	};
 
 	return (
@@ -143,6 +177,7 @@ export default function PreferencesComponent() {
 					type='text'
 					value={localAdminPref.defaultMeterReadingFrequency}
 					onChange={e => makeLocalChanges('defaultMeterReadingFrequency', e.target.value)}
+					invalid={invalidReadingFreq()}
 				/>
 			</div>
 			<div>
@@ -154,6 +189,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMinimumValue}
 					onChange={e => makeLocalChanges('defaultMeterMinimumValue', e.target.value)}
 					maxLength={50}
+					invalid={invalidValueLimits()}
 				/>
 			</div>
 			<div>
@@ -165,6 +201,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMaximumValue}
 					onChange={e => makeLocalChanges('defaultMeterMaximumValue', e.target.value)}
 					maxLength={50}
+					invalid={invalidValueLimits()}
 				/>
 			</div>
 			<div>
@@ -176,6 +213,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMinimumDate}
 					onChange={e => makeLocalChanges('defaultMeterMinimumDate', e.target.value)}
 					placeholder='YYYY-MM-DD HH:MM:SS'
+					invalid={invalidDateLimits()}
 				/>
 			</div>
 			<div>
@@ -187,6 +225,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMaximumDate}
 					onChange={e => makeLocalChanges('defaultMeterMaximumDate', e.target.value)}
 					placeholder='YYYY-MM-DD HH:MM:SS'
+					invalid={invalidDateLimits()}
 				/>
 			</div>
 			<div>
@@ -198,6 +237,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterReadingGap}
 					onChange={e => makeLocalChanges('defaultMeterReadingGap', e.target.value)}
 					maxLength={50}
+					invalid={invalidReadingGap()}
 				/>
 			</div>
 			<div>
@@ -209,6 +249,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMaximumErrors}
 					onChange={e => makeLocalChanges('defaultMeterMaximumErrors', e.target.value)}
 					maxLength={50}
+					invalid={invalidMeterErrors()}
 				/>
 			</div>
 			<div>
@@ -298,6 +339,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultWarningFileSize}
 					onChange={e => makeLocalChanges('defaultWarningFileSize', e.target.value)}
 					maxLength={50}
+					invalid={invalidWarningFileSize()}
 				/>
 			</div>
 			<div>
@@ -309,6 +351,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultFileSizeLimit}
 					onChange={e => makeLocalChanges('defaultFileSizeLimit', e.target.value)}
 					maxLength={50}
+					invalid={invalidFileSizeLimit()}
 				/>
 			</div>
 			<div>
