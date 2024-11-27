@@ -198,14 +198,41 @@ mocha.describe('Obvius API', () => {
 				//the third line of the response should be the config file
 				expect(res.text.split("\n")[2]).equals(response);
 
-				//config file uploads should create accurate meters
-				const allMeters = await Meter.getAll(conn);
-				allMeters.forEach((meter) => {
-					expect(meter.type).to.equal('obvius');
-				})
 
 				//mb-001.ini should make 28 meters (obvius uses submeters to describe traits of a meter)
 				expect(allMeters.length).to.equal(28);
+
+				//config file uploads should create accurate meters
+				const allMeters = await Meter.getAll(conn);
+				//combine each field into different arrays for one assertion
+				//these arrays should vary for different submeters
+				const meterNames = [];
+				const meterIDs = [];
+				//these arrays should not vary for different submeters
+				const meterTypes = [];
+				const meterIsDisplayable = [];
+				const meterIsEnabled = [];
+
+				let count = 0;
+				allMeters.forEach((meter) => {
+					meterNames[count] = meter.name;
+					meterIDs[count] = meter.id;
+					meterTypes[count] = meter.type;
+					meterIsDisplayable[count] = meter.displayable;
+					meterIsEnabled[count] = meter.enabled;
+					count++;
+				})
+				const allMetersAreNotDisplayable = 
+/**You can keep the current PR and update if you want.
+I think it is important that the meter has:
+displayable as false
+enabled as false
+name to be correct (varies for each one)
+identifier to be correct (varies for each one)
+I think I have this correct but did not double check the details.
+The name & identifier are constructed by OED per our conversation yesterday.
+You will probably need to create a list in the test code to compare against.
+I hope this helps. */
 			});
 		});
 	});
