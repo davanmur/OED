@@ -11,6 +11,7 @@ const Configfile = require('../../models/obvius/Configfile');
 const bcrypt = require('bcryptjs');
 const { insertUnits } = require('../../util/insertData');
 const Unit = require('../../models/Unit');
+const Meter = require('../../models/Meter.js');
 
 mocha.describe('Obvius API', () => {
 	mocha.describe('upload: ', () => {
@@ -196,6 +197,15 @@ mocha.describe('Obvius API', () => {
 
 				//the third line of the response should be the config file
 				expect(res.text.split("\n")[2]).equals(response);
+
+				//config file uploads should create accurate meters
+				const allMeters = await Meter.getAll(conn);
+				allMeters.forEach((meter) => {
+					expect(meter.type).to.equal('obvius');
+				})
+
+				//mb-001.ini should make 28 meters (obvius uses submeters to describe traits of a meter)
+				expect(allMeters.length).to.equal(28);
 			});
 		});
 	});
