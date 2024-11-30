@@ -215,29 +215,29 @@ mocha.describe('Obvius API', () => {
 
 				//expected names and ids
 				const expMeterNames = [
-					'mb-001.0', 'mb-001.1', 'mb-001.2', 'mb-001.3', 'mb-001.4', 'mb-001.5', 'mb-001.6', 'mb-001.7', 
-					'mb-001.8', 'mb-001.9', 'mb-001.10', 'mb-001.11', 'mb-001.12', 'mb-001.13', 'mb-001.14', 'mb-001.15', 
-					'mb-001.16', 'mb-001.17', 'mb-001.18', 'mb-001.19', 'mb-001.20', 'mb-001.21', 'mb-001.22', 'mb-001.23', 
+					'mb-001.0', 'mb-001.1', 'mb-001.2', 'mb-001.3', 'mb-001.4', 'mb-001.5', 'mb-001.6', 'mb-001.7',
+					'mb-001.8', 'mb-001.9', 'mb-001.10', 'mb-001.11', 'mb-001.12', 'mb-001.13', 'mb-001.14', 'mb-001.15',
+					'mb-001.16', 'mb-001.17', 'mb-001.18', 'mb-001.19', 'mb-001.20', 'mb-001.21', 'mb-001.22', 'mb-001.23',
 					'mb-001.24', 'mb-001.25', 'mb-001.26', 'mb-001.27'
-				  ];
-				  
-				  const expMeterIDs = [
+				];
+
+				const expMeterIDs = [
 					1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
-				  ];
-				for(const meter of allMeters) {
+				];
+				for (const meter of allMeters) {
 					//populate arrays with varying values in ascending order
 					let currentName = meter.name + "";
 					let idx = currentName.split('.')[1];
 					meterNames[parseInt(idx)] = meter.name;
-					meterIDs[meter.id-1] = meter.id;
+					meterIDs[meter.id - 1] = meter.id;
 					//ensure each meter is obvius, not displayable, and not enabled
-					if(meter.type != 'obvius') {
+					if (meter.type != 'obvius') {
 						allMetersAreObvius = false;
 					}
-					if(meter.displayable != false) {
+					if (meter.displayable != false) {
 						allMetersAreNotDisplayable = false;
 					}
-					if(meter.enabled != false) {
+					if (meter.enabled != false) {
 						allMetersAreNotEnabled = false;
 					}
 				}
@@ -247,12 +247,12 @@ mocha.describe('Obvius API', () => {
 				const expectedIDsAreEqual = true;
 
 				//both arrays should be contain the same sequence of values
-				for(let i = 0; i < 28; i++) {
-					if(expMeterNames[i] != meterNames[i]) {
+				for (let i = 0; i < 28; i++) {
+					if (expMeterNames[i] != meterNames[i]) {
 						expectedNamesAreEqual = false;
 					}
-				
-					if(expMeterIDs[i] != meterIDs[i]) {
+
+					if (expMeterIDs[i] != meterIDs[i]) {
 						expectedIDsAreEqual = false;
 					}
 				}
@@ -261,7 +261,6 @@ mocha.describe('Obvius API', () => {
 				expect(allMetersAreObvius).to.equal(true);
 				expect(allMetersAreNotDisplayable).to.equal(true);
 				expect(allMetersAreNotEnabled).to.equal(true);
-
 
 				//expected arrays should equal actual arrays
 				expect(expectedNamesAreEqual).to.equal(true);
