@@ -198,41 +198,74 @@ mocha.describe('Obvius API', () => {
 				//the third line of the response should be the config file
 				expect(res.text.split("\n")[2]).equals(response);
 
+				//config file uploads should create accurate meter objects
+				const allMeters = await Meter.getAll(conn);
 
-				//mb-001.ini should make 28 meters (obvius uses submeters to describe traits of a meter)
+				//mb-001.ini should make 28 meters
 				expect(allMeters.length).to.equal(28);
 
-				//config file uploads should create accurate meters
-				const allMeters = await Meter.getAll(conn);
-				//combine each field into different arrays for one assertion
 				//these arrays should vary for different submeters
 				const meterNames = [];
 				const meterIDs = [];
-				//these arrays should not vary for different submeters
-				const meterTypes = [];
-				const meterIsDisplayable = [];
-				const meterIsEnabled = [];
 
-				let count = 0;
-				allMeters.forEach((meter) => {
-					meterNames[count] = meter.name;
-					meterIDs[count] = meter.id;
-					meterTypes[count] = meter.type;
-					meterIsDisplayable[count] = meter.displayable;
-					meterIsEnabled[count] = meter.enabled;
-					count++;
-				})
-				const allMetersAreNotDisplayable = 
-/**You can keep the current PR and update if you want.
-I think it is important that the meter has:
-displayable as false
-enabled as false
-name to be correct (varies for each one)
-identifier to be correct (varies for each one)
-I think I have this correct but did not double check the details.
-The name & identifier are constructed by OED per our conversation yesterday.
-You will probably need to create a list in the test code to compare against.
-I hope this helps. */
+				//flags for meter fields (.type, .displayable, .enabled)
+				const allMetersAreObvius = true;
+				const allMetersAreNotDisplayable = true;
+				const allMetersAreNotEnabled = true;
+
+				//expected names and ids
+				const expMeterNames = [
+					'mb-001.0', 'mb-001.1', 'mb-001.2', 'mb-001.3', 'mb-001.4', 'mb-001.5', 'mb-001.6', 'mb-001.7', 
+					'mb-001.8', 'mb-001.9', 'mb-001.10', 'mb-001.11', 'mb-001.12', 'mb-001.13', 'mb-001.14', 'mb-001.15', 
+					'mb-001.16', 'mb-001.17', 'mb-001.18', 'mb-001.19', 'mb-001.20', 'mb-001.21', 'mb-001.22', 'mb-001.23', 
+					'mb-001.24', 'mb-001.25', 'mb-001.26', 'mb-001.27'
+				  ];
+				  
+				  const expMeterIDs = [
+					1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
+				  ];
+				for(const meter of allMeters) {
+					//populate arrays with varying values in ascending order
+					let currentName = meter.name + "";
+					let idx = currentName.split('.')[1];
+					meterNames[parseInt(idx)] = meter.name;
+					meterIDs[meter.id-1] = meter.id;
+					//ensure each meter is obvius, not displayable, and not enabled
+					if(meter.type != 'obvius') {
+						allMetersAreObvius = false;
+					}
+					if(meter.displayable != false) {
+						allMetersAreNotDisplayable = false;
+					}
+					if(meter.enabled != false) {
+						allMetersAreNotEnabled = false;
+					}
+				}
+
+				//flags for comparison between expected arrays and actual arrays
+				const expectedNamesAreEqual = true;
+				const expectedIDsAreEqual = true;
+
+				//both arrays should be contain the same sequence of values
+				for(let i = 0; i < 28; i++) {
+					if(expMeterNames[i] != meterNames[i]) {
+						expectedNamesAreEqual = false;
+					}
+				
+					if(expMeterIDs[i] != meterIDs[i]) {
+						expectedIDsAreEqual = false;
+					}
+				}
+
+				//assertion for type, displayable, and enabled
+				expect(allMetersAreObvius).to.equal(true);
+				expect(allMetersAreNotDisplayable).to.equal(true);
+				expect(allMetersAreNotEnabled).to.equal(true);
+
+
+				//expected arrays should equal actual arrays
+				expect(expectedNamesAreEqual).to.equal(true);
+				expect(expectedIDsAreEqual).to.equal(true);
 			});
 		});
 	});
