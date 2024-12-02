@@ -6,9 +6,12 @@ import { cloneDeep, isEqual } from 'lodash';
 import * as moment from 'moment';
 import * as React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Button, Input } from 'reactstrap';
+import { Button, Input, FormFeedback } from 'reactstrap';
 import { UnsavedWarningComponent } from '../UnsavedWarningComponent';
 import { preferencesApi } from '../../redux/api/preferencesApi';
+import {
+	MIN_DATE, MIN_DATE_MOMENT, MAX_DATE, MAX_DATE_MOMENT, MAX_VAL, MIN_VAL, MAX_ERRORS
+} from '../../redux/selectors/adminSelectors';
 import { PreferenceRequestItem, TrueFalseType } from '../../types/items';
 import { ChartTypes } from '../../types/redux/graph';
 import { LanguageTypes } from '../../types/redux/i18n';
@@ -50,14 +53,28 @@ export default function PreferencesComponent() {
 	};
 
 	// force check some localAdminPref values as numbers, they are stored as strings
-	const invalidValueLimits = () => {
-		return Number(localAdminPref.defaultMeterMinimumValue) >= Number(localAdminPref.defaultMeterMaximumValue);
+	const invalidMinValue = () => {
+		const min = Number(localAdminPref.defaultMeterMinimumValue);
+		const max = Number(localAdminPref.defaultMeterMaximumValue);
+		return  min < MIN_VAL || min > max;
 	};
 
-	const invalidDateLimits = () => {
+	const invalidMaxValue = () => {
+		const min = Number(localAdminPref.defaultMeterMinimumValue);
+		const max = Number(localAdminPref.defaultMeterMaximumValue);
+		return max > MAX_VAL || min > max;
+	};
+
+	const invalidMinDate = () => {
 		const minMoment = moment(localAdminPref.defaultMeterMinimumDate);
 		const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
-		return !minMoment.isValid() || !maxMoment.isValid() || !minMoment.isBefore(maxMoment);
+		return !minMoment.isValid() || !minMoment.isSameOrAfter(MIN_DATE_MOMENT) || !minMoment.isSameOrBefore(maxMoment);
+	};
+
+	const invalidMaxDate = () => {
+		const minMoment = moment(localAdminPref.defaultMeterMinimumDate);
+		const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
+		return !maxMoment.isValid() || !maxMoment.isSameOrBefore(MAX_DATE_MOMENT) || !maxMoment.isSameOrAfter(minMoment);
 	};
 
 	const invalidReadingGap = () => {
@@ -65,7 +82,8 @@ export default function PreferencesComponent() {
 	};
 
 	const invalidMeterErrors = () => {
-		return Number(localAdminPref.defaultMeterMaximumErrors) <= 0;
+		return Number(localAdminPref.defaultMeterMaximumErrors) < 0
+			|| Number(localAdminPref.defaultMeterMaximumErrors) > MAX_ERRORS;
 	};
 
 	const invalidFileSizeLimit = () => {
@@ -189,8 +207,11 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMinimumValue}
 					onChange={e => makeLocalChanges('defaultMeterMinimumValue', e.target.value)}
 					maxLength={50}
-					invalid={invalidValueLimits()}
+					invalid={invalidMinValue()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: MIN_VAL, max: Number(localAdminPref.defaultMeterMaximumValue) }}/>
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -201,8 +222,11 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMaximumValue}
 					onChange={e => makeLocalChanges('defaultMeterMaximumValue', e.target.value)}
 					maxLength={50}
-					invalid={invalidValueLimits()}
+					invalid={invalidMaxValue()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: Number(localAdminPref.defaultMeterMinimumValue), max: MAX_VAL }}/>
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -213,8 +237,11 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMinimumDate}
 					onChange={e => makeLocalChanges('defaultMeterMinimumDate', e.target.value)}
 					placeholder='YYYY-MM-DD HH:MM:SS'
-					invalid={invalidDateLimits()}
+					invalid={invalidMinDate()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: MIN_DATE, max: moment(localAdminPref.defaultMeterMaximumDate).utc().format() }} />
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -225,8 +252,11 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMaximumDate}
 					onChange={e => makeLocalChanges('defaultMeterMaximumDate', e.target.value)}
 					placeholder='YYYY-MM-DD HH:MM:SS'
-					invalid={invalidDateLimits()}
+					invalid={invalidMaxDate()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: MAX_DATE, max: moment(localAdminPref.defaultMeterMinimumDate).utc().format() }} />
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -239,6 +269,9 @@ export default function PreferencesComponent() {
 					maxLength={50}
 					invalid={invalidReadingGap()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: 0, max: Infinity }}/>
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -251,6 +284,9 @@ export default function PreferencesComponent() {
 					maxLength={50}
 					invalid={invalidMeterErrors()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: 0, max: MAX_ERRORS }}/>
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -341,6 +377,9 @@ export default function PreferencesComponent() {
 					maxLength={50}
 					invalid={invalidWarningFileSize()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: 0, max: Number(localAdminPref.defaultFileSizeLimit) }}/>
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -353,6 +392,9 @@ export default function PreferencesComponent() {
 					maxLength={50}
 					invalid={invalidFileSizeLimit()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.bounds" values={{ min: 0, max: Infinity }}/>
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
