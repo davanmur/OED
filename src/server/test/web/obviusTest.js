@@ -177,6 +177,9 @@ mocha.describe('Obvius API', () => {
 				obviusUser.password = password;
 				const uploadRequestMode = 'CONFIGFILEUPLOAD';
 				const manifestRequestMode = 'CONFIGFILEMANIFEST';
+				const serialStart = 'mb-';
+				const serialNumber = serialStart + '001';
+				const modbusDevice = '1234'
 
 				// Adapted from ../obvius/README.md
 				const configFilePath = 'src/server/test/web/obvius/mb-001.ini.gz';
@@ -185,8 +188,8 @@ mocha.describe('Obvius API', () => {
 					.field('username', obviusUser.username)
 					.field('password', obviusUser.password)
 					.field('mode', uploadRequestMode)
-					.field('serialnumber', 'mb-001')
-					.field('modbusdevice', '1234')
+					.field('serialnumber', serialNumber)
+					.field('modbusdevice', modbusDevice)
 					.attach('files', configFilePath);
 
 				//logfile upload should respond with 200, success
@@ -205,7 +208,7 @@ mocha.describe('Obvius API', () => {
 				const allConfigfiles = await Configfile.getAll(conn);
 				let response = '';
 				for (f of allConfigfiles) {
-					response += `CONFIGFILE,${f.makeFilename()},${f.hash},${f.created.format('YYYY-MM-DD hh:mm:ss')}`;
+					response += `CONFIGFILE,${serialNumber}-${serialStart}${modbusDevice}.ini,${f.hash},${f.created.format('YYYY-MM-DD hh:mm:ss')}`;
 				}
 
 				//the third line of the response should be the config file
