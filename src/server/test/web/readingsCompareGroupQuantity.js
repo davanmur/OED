@@ -58,7 +58,8 @@ mocha.describe('readings API', () => {
 
 				// Add CG5 here
 
-				mocha.it('CG6: 28 day shift end 2022-10-31 17:12:34 for 15 minute reading intervals and quantity units & kWh as kWh ', async () => {
+				// Add CG6 here
+				mocha.it('CG6: 28-day shift end 2022-10-31 17:12:34 for 15-minute reading intervals and quantity units & kWh as kWh', async () => {
 					await prepareTest(unitDatakWh, conversionDatakWh, meterDatakWhGroups, groupDatakWh);
 					// Get the unit ID since the DB could use any value.
 					const unitId = await getUnitId('kWh');
@@ -66,13 +67,15 @@ mocha.describe('readings API', () => {
 					// for compare, need the unitID, currentStart, currentEnd, shift
 					const res = await chai.request(app).get(`/api/compareReadings/groups/${GROUP_ID}`)
 						.query({
-							curr_start: '2022-10-09 00:00:00',
-							curr_end: '2022-10-31 17:12:34',
-							shift: 'P28D',
-							graphicUnitId: unitId
+							curr_start: '2022-10-09 00:00:00', 
+							curr_end: '2022-10-31 17:12:34',  
+							shift: 'P28D',                    // 28-day shift
+							graphicUnitId: unitId             // Unit ID for kWh
 						});
+				
 					expectCompareToEqualExpected(res, expected, GROUP_ID);
 				});
+
 
 				// Add CG8 here
 
