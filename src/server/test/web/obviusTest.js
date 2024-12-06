@@ -12,6 +12,19 @@ const bcrypt = require('bcryptjs');
 const { insertUnits } = require('../../util/insertData');
 const Unit = require('../../models/Unit');
 const Meter = require('../../models/Meter.js');
+const { Console } = require('console');
+
+//expected names and ids for obvius meters.
+const expMeterNames = [
+	'mb-001.0', 'mb-001.1', 'mb-001.2', 'mb-001.3', 'mb-001.4', 'mb-001.5', 'mb-001.6', 'mb-001.7',
+	'mb-001.8', 'mb-001.9', 'mb-001.10', 'mb-001.11', 'mb-001.12', 'mb-001.13', 'mb-001.14', 'mb-001.15',
+	'mb-001.16', 'mb-001.17', 'mb-001.18', 'mb-001.19', 'mb-001.20', 'mb-001.21', 'mb-001.22', 'mb-001.23',
+	'mb-001.24', 'mb-001.25', 'mb-001.26', 'mb-001.27'
+];
+
+const expMeterIDs = [
+	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
+];
 
 mocha.describe('Obvius API', () => {
 	mocha.describe('upload: ', () => {
@@ -176,14 +189,14 @@ mocha.describe('Obvius API', () => {
 					.field('modbusdevice', '1234')
 					.attach('files', configFilePath);
 
+				//logfile upload should respond with 200, success
+				expect(upload).to.have.status(200);
+
 				const res = await chai.request(app)
 					.post('/api/obvius')
 					.field('username', obviusUser.username)
 					.field('password', obviusUser.password)
 					.field('mode', manifestRequestMode);
-
-				//logfile upload should respond with 200, success
-				expect(upload).to.have.status(200);
 
 				//logfile request should respond with 200, success
 				expect(res).to.have.status(200);
@@ -201,8 +214,8 @@ mocha.describe('Obvius API', () => {
 				//config file uploads should create accurate meter objects
 				const allMeters = await Meter.getAll(conn);
 
-				//mb-001.ini should make 28 meters
-				expect(allMeters.length).to.equal(28);
+				//mb-001.ini should make meters equal to expMeterNames.length
+				expect(allMeters.length).to.equal(expMeterNames.length);
 
 				//these arrays should vary for different submeters
 				const meterNames = [];
@@ -213,20 +226,9 @@ mocha.describe('Obvius API', () => {
 				const allMetersAreNotDisplayable = true;
 				const allMetersAreNotEnabled = true;
 
-				//expected names and ids
-				const expMeterNames = [
-					'mb-001.0', 'mb-001.1', 'mb-001.2', 'mb-001.3', 'mb-001.4', 'mb-001.5', 'mb-001.6', 'mb-001.7',
-					'mb-001.8', 'mb-001.9', 'mb-001.10', 'mb-001.11', 'mb-001.12', 'mb-001.13', 'mb-001.14', 'mb-001.15',
-					'mb-001.16', 'mb-001.17', 'mb-001.18', 'mb-001.19', 'mb-001.20', 'mb-001.21', 'mb-001.22', 'mb-001.23',
-					'mb-001.24', 'mb-001.25', 'mb-001.26', 'mb-001.27'
-				];
-
-				const expMeterIDs = [
-					1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
-				];
 				for (const meter of allMeters) {
 					//populate arrays with varying values in ascending order
-					let currentName = meter.name + "";
+					let currentName = meter.name;
 					let idx = currentName.split('.')[1];
 					meterNames[parseInt(idx)] = meter.name;
 					meterIDs[meter.id - 1] = meter.id;
@@ -243,17 +245,25 @@ mocha.describe('Obvius API', () => {
 				}
 
 				//flags for comparison between expected arrays and actual arrays
-				const expectedNamesAreEqual = true;
-				const expectedIDsAreEqual = true;
+				let expectedNamesAreEqual = true;
+				let expectedIDsAreEqual = true;
+
+				//error message for more descriptive failures
+				let allErrorMessagesNames = "";
+				let allErrorMessagesIDs = "";
+
 
 				//both arrays should be contain the same sequence of values
 				for (let i = 0; i < 28; i++) {
 					if (expMeterNames[i] != meterNames[i]) {
 						expectedNamesAreEqual = false;
+						allErrorMessagesNames += "Meter failed name comparison, Expeceted: " + expMeterNames[i] + " Actual: " + meterNames[i] + "\n";
 					}
 
 					if (expMeterIDs[i] != meterIDs[i]) {
 						expectedIDsAreEqual = false;
+						allErrorMessagesIDs += "Meter failed ID comparison. Expected: " + expMeterIDs[i] + " Actual: " + meterIDs[i] + "\n";
+
 					}
 				}
 
@@ -263,8 +273,8 @@ mocha.describe('Obvius API', () => {
 				expect(allMetersAreNotEnabled).to.equal(true);
 
 				//expected arrays should equal actual arrays
-				expect(expectedNamesAreEqual).to.equal(true);
-				expect(expectedIDsAreEqual).to.equal(true);
+				expect(expectedNamesAreEqual).to.equal(true, allErrorMessagesNames);
+				expect(expectedIDsAreEqual).to.equal(true, allErrorMessagesIDs);
 			});
 		});
 	});
