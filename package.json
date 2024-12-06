@@ -56,6 +56,7 @@
 		]
 	},
 	"dependencies": {
+		"@plotly/mapbox-gl": "~1.13.4",
 		"@reduxjs/toolkit": "~2.2.5",
 		"@wojtekmaj/react-daterange-picker": "~6.0.0",
 		"axios": "~1.6.2",
