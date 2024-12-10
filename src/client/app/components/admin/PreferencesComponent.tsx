@@ -198,7 +198,7 @@ export default function PreferencesComponent() {
 					invalid={invalidReadingFreq()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.unknown" ></FormattedMessage>
+					<FormattedMessage id="invalid.input" ></FormattedMessage>
 				</FormFeedback>
 			</div>
 			<div>
@@ -401,7 +401,7 @@ export default function PreferencesComponent() {
 					type='number'
 					value={localAdminPref.defaultFileSizeLimit}
 					onChange={e => makeLocalChanges('defaultFileSizeLimit', e.target.value)}
-					min='0'
+					min={Number(localAdminPref.defaultWarningFileSize)}
 					maxLength={50}
 					invalid={invalidFileSizeLimit()}
 				/>
