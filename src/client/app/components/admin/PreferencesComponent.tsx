@@ -56,7 +56,7 @@ export default function PreferencesComponent() {
 		minValue: (): boolean => {
 			const min = Number(localAdminPref.defaultMeterMinimumValue);
 			const max = Number(localAdminPref.defaultMeterMaximumValue);
-			return  min < MIN_VAL || min > max;
+			return min < MIN_VAL || min > max;
 		},
 		maxValue: (): boolean => {
 			const min = Number(localAdminPref.defaultMeterMinimumValue);
@@ -73,15 +73,22 @@ export default function PreferencesComponent() {
 			const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
 			return !maxMoment.isValid() || !maxMoment.isSameOrBefore(MAX_DATE_MOMENT) || !maxMoment.isSameOrAfter(minMoment);
 		},
-		readingGap: (): boolean => Number(localAdminPref.defaultMeterReadingGap) < 0,
+		readingGap: (): boolean => { return Number(localAdminPref.defaultMeterReadingGap) < 0; },
 
-		meterErrors: (): boolean => Number(localAdminPref.defaultMeterMaximumErrors) < 0
-			|| Number(localAdminPref.defaultMeterMaximumErrors) > MAX_ERRORS,
+		meterErrors: (): boolean => {
+			return Number(localAdminPref.defaultMeterMaximumErrors) < 0
+				|| Number(localAdminPref.defaultMeterMaximumErrors) > MAX_ERRORS;
+		},
 
-		fileSizeLimit: (): boolean => Number(localAdminPref.defaultFileSizeLimit) < 0,
+		warningFileSize: (): boolean => {
+			return Number(localAdminPref.defaultWarningFileSize) < 0
+				|| Number(localAdminPref.defaultWarningFileSize) > Number(localAdminPref.defaultFileSizeLimit);
+		},
 
-		warningFileSize: (): boolean => Number(localAdminPref.defaultWarningFileSize) < 0
-			|| Number(localAdminPref.defaultWarningFileSize) > Number(localAdminPref.defaultFileSizeLimit)
+		fileSizeLimit: (): boolean => {
+			return Number(localAdminPref.defaultFileSizeLimit) < 0
+				|| Number(localAdminPref.defaultWarningFileSize) > Number(localAdminPref.defaultFileSizeLimit);
+		}
 	};
 
 	return (
@@ -204,7 +211,7 @@ export default function PreferencesComponent() {
 					invalid={invalidFuncs.minValue()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.bounds" values={{ min: MIN_VAL, max: Number(localAdminPref.defaultMeterMaximumValue) }}/>
+					<FormattedMessage id="error.bounds" values={{ min: MIN_VAL, max: Number(localAdminPref.defaultMeterMaximumValue) }} />
 				</FormFeedback>
 			</div>
 			<div>
@@ -221,7 +228,7 @@ export default function PreferencesComponent() {
 					invalid={invalidFuncs.maxValue()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.bounds" values={{ min: Number(localAdminPref.defaultMeterMinimumValue), max: MAX_VAL }}/>
+					<FormattedMessage id="error.bounds" values={{ min: Number(localAdminPref.defaultMeterMinimumValue), max: MAX_VAL }} />
 				</FormFeedback>
 			</div>
 			<div>
@@ -267,7 +274,7 @@ export default function PreferencesComponent() {
 					invalid={invalidFuncs.readingGap()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.bounds" values={{ min: 0, max: Infinity }}/>
+					<FormattedMessage id="error.bounds" values={{ min: 0, max: Infinity }} />
 				</FormFeedback>
 			</div>
 			<div>
@@ -284,7 +291,7 @@ export default function PreferencesComponent() {
 					invalid={invalidFuncs.meterErrors()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.bounds" values={{ min: 0, max: MAX_ERRORS }}/>
+					<FormattedMessage id="error.bounds" values={{ min: 0, max: MAX_ERRORS }} />
 				</FormFeedback>
 			</div>
 			<div>
@@ -379,7 +386,7 @@ export default function PreferencesComponent() {
 					invalid={invalidFuncs.warningFileSize()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.bounds" values={{ min: 0, max: Number(localAdminPref.defaultFileSizeLimit) }}/>
+					<FormattedMessage id="error.bounds" values={{ min: 0, max: Number(localAdminPref.defaultFileSizeLimit) }} />
 				</FormFeedback>
 			</div>
 			<div>
@@ -395,7 +402,7 @@ export default function PreferencesComponent() {
 					invalid={invalidFuncs.fileSizeLimit()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.bounds" values={{ min: 0, max: Infinity }}/>
+					<FormattedMessage id="error.bounds" values={{ min: Number(localAdminPref.defaultWarningFileSize), max: Infinity }} />
 				</FormFeedback>
 			</div>
 			<div>
