@@ -46,7 +46,7 @@ export default function PreferencesComponent() {
 		setLocalAdminPref(cloneDeep(adminPreferences));
 	};
 
-	// small functions that determine if fields are invalid to warn the user
+	// small functions that determine if fields are invalid
 	const invalidReadingFreq = () => {
 		const frequency = moment.duration(localAdminPref.defaultMeterReadingFrequency);
 		return !frequency.isValid() || frequency.asSeconds() <= 0;
@@ -197,6 +197,9 @@ export default function PreferencesComponent() {
 					onChange={e => makeLocalChanges('defaultMeterReadingFrequency', e.target.value)}
 					invalid={invalidReadingFreq()}
 				/>
+				<FormFeedback>
+					<FormattedMessage id="error.unknown" ></FormattedMessage>
+				</FormFeedback>
 			</div>
 			<div>
 				<p className='mt-2' style={titleStyle}>
@@ -206,6 +209,8 @@ export default function PreferencesComponent() {
 					type='number'
 					value={localAdminPref.defaultMeterMinimumValue}
 					onChange={e => makeLocalChanges('defaultMeterMinimumValue', e.target.value)}
+					min={MIN_VAL}
+					max={Number(localAdminPref.defaultMeterMaximumValue)}
 					maxLength={50}
 					invalid={invalidMinValue()}
 				/>
@@ -221,6 +226,8 @@ export default function PreferencesComponent() {
 					type='number'
 					value={localAdminPref.defaultMeterMaximumValue}
 					onChange={e => makeLocalChanges('defaultMeterMaximumValue', e.target.value)}
+					min={Number(localAdminPref.defaultMeterMinimumValue)}
+					max={MAX_VAL}
 					maxLength={50}
 					invalid={invalidMaxValue()}
 				/>
@@ -255,7 +262,7 @@ export default function PreferencesComponent() {
 					invalid={invalidMaxDate()}
 				/>
 				<FormFeedback>
-					<FormattedMessage id="error.bounds" values={{ min: MAX_DATE, max: moment(localAdminPref.defaultMeterMinimumDate).utc().format() }} />
+					<FormattedMessage id="error.bounds" values={{ min: moment(localAdminPref.defaultMeterMinimumDate).utc().format(), max: MAX_DATE }} />
 				</FormFeedback>
 			</div>
 			<div>
@@ -266,6 +273,7 @@ export default function PreferencesComponent() {
 					type='number'
 					value={localAdminPref.defaultMeterReadingGap}
 					onChange={e => makeLocalChanges('defaultMeterReadingGap', e.target.value)}
+					min='0'
 					maxLength={50}
 					invalid={invalidReadingGap()}
 				/>
@@ -281,6 +289,8 @@ export default function PreferencesComponent() {
 					type='number'
 					value={localAdminPref.defaultMeterMaximumErrors}
 					onChange={e => makeLocalChanges('defaultMeterMaximumErrors', e.target.value)}
+					min='0'
+					max={MAX_ERRORS}
 					maxLength={50}
 					invalid={invalidMeterErrors()}
 				/>
@@ -374,6 +384,8 @@ export default function PreferencesComponent() {
 					type='number'
 					value={localAdminPref.defaultWarningFileSize}
 					onChange={e => makeLocalChanges('defaultWarningFileSize', e.target.value)}
+					min='0'
+					max={Number(localAdminPref.defaultFileSizeLimit)}
 					maxLength={50}
 					invalid={invalidWarningFileSize()}
 				/>
@@ -389,6 +401,7 @@ export default function PreferencesComponent() {
 					type='number'
 					value={localAdminPref.defaultFileSizeLimit}
 					onChange={e => makeLocalChanges('defaultFileSizeLimit', e.target.value)}
+					min='0'
 					maxLength={50}
 					invalid={invalidFileSizeLimit()}
 				/>
@@ -427,7 +440,9 @@ export default function PreferencesComponent() {
 								showErrorNotification(translate('failed.to.submit.changes'));
 							})
 					}
-					disabled={!hasChanges}
+					disabled={!hasChanges || invalidReadingFreq() || invalidMinValue() || invalidMaxValue() || invalidMinDate() || invalidMaxDate()
+						|| invalidReadingGap() || invalidMeterErrors() || invalidFileSizeLimit() || invalidWarningFileSize()
+					}
 				>
 					{translate('submit')}
 				</Button>
