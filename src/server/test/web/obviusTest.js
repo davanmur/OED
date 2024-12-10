@@ -257,10 +257,10 @@ mocha.describe('Obvius API', () => {
 
 
 				//both arrays should be contain the same sequence of values
-				for (let i = 0; i < 28; i++) {
+				for (let i = 0; i < expMeterNames.length; i++) {
 					if (expMeterNames[i] != meterNames[i]) {
 						expectedNamesAreEqual = false;
-						allErrorMessagesNames += "Meter failed name comparison, Expeceted: " + expMeterNames[i] + " Actual: " + meterNames[i] + "\n";
+						allErrorMessagesNames += "Meter failed name comparison, Expected: " + expMeterNames[i] + " Actual: " + meterNames[i] + "\n";
 					}
 
 					if (expMeterIDs[i] != meterIDs[i]) {
