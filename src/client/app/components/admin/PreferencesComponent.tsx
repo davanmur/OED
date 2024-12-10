@@ -46,53 +46,42 @@ export default function PreferencesComponent() {
 		setLocalAdminPref(cloneDeep(adminPreferences));
 	};
 
-	// small functions that determine if fields are invalid
-	const invalidReadingFreq = () => {
-		const frequency = moment.duration(localAdminPref.defaultMeterReadingFrequency);
-		return !frequency.isValid() || frequency.asSeconds() <= 0;
-	};
+	// Functions for input validation and warnings. Each returns true if the user inputs invalid data into its field
+	// Need to be functions due to static reference. If they were booleans they wouldn't update when localAdminPref updates
+	const invalidFuncs = {
+		readingFreq: (): boolean => {
+			const frequency = moment.duration(localAdminPref.defaultMeterReadingFrequency);
+			return !frequency.isValid() || frequency.asSeconds() <= 0;
+		},
+		minValue: (): boolean => {
+			const min = Number(localAdminPref.defaultMeterMinimumValue);
+			const max = Number(localAdminPref.defaultMeterMaximumValue);
+			return  min < MIN_VAL || min > max;
+		},
+		maxValue: (): boolean => {
+			const min = Number(localAdminPref.defaultMeterMinimumValue);
+			const max = Number(localAdminPref.defaultMeterMaximumValue);
+			return max > MAX_VAL || min > max;
+		},
+		minDate: (): boolean => {
+			const minMoment = moment(localAdminPref.defaultMeterMinimumDate);
+			const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
+			return !minMoment.isValid() || !minMoment.isSameOrAfter(MIN_DATE_MOMENT) || !minMoment.isSameOrBefore(maxMoment);
+		},
+		maxDate: (): boolean => {
+			const minMoment = moment(localAdminPref.defaultMeterMinimumDate);
+			const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
+			return !maxMoment.isValid() || !maxMoment.isSameOrBefore(MAX_DATE_MOMENT) || !maxMoment.isSameOrAfter(minMoment);
+		},
+		readingGap: (): boolean => Number(localAdminPref.defaultMeterReadingGap) < 0,
 
-	// force check some localAdminPref values as numbers, they are stored as strings
-	const invalidMinValue = () => {
-		const min = Number(localAdminPref.defaultMeterMinimumValue);
-		const max = Number(localAdminPref.defaultMeterMaximumValue);
-		return  min < MIN_VAL || min > max;
-	};
+		meterErrors: (): boolean => Number(localAdminPref.defaultMeterMaximumErrors) < 0
+			|| Number(localAdminPref.defaultMeterMaximumErrors) > MAX_ERRORS,
 
-	const invalidMaxValue = () => {
-		const min = Number(localAdminPref.defaultMeterMinimumValue);
-		const max = Number(localAdminPref.defaultMeterMaximumValue);
-		return max > MAX_VAL || min > max;
-	};
+		fileSizeLimit: (): boolean => Number(localAdminPref.defaultFileSizeLimit) < 0,
 
-	const invalidMinDate = () => {
-		const minMoment = moment(localAdminPref.defaultMeterMinimumDate);
-		const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
-		return !minMoment.isValid() || !minMoment.isSameOrAfter(MIN_DATE_MOMENT) || !minMoment.isSameOrBefore(maxMoment);
-	};
-
-	const invalidMaxDate = () => {
-		const minMoment = moment(localAdminPref.defaultMeterMinimumDate);
-		const maxMoment = moment(localAdminPref.defaultMeterMaximumDate);
-		return !maxMoment.isValid() || !maxMoment.isSameOrBefore(MAX_DATE_MOMENT) || !maxMoment.isSameOrAfter(minMoment);
-	};
-
-	const invalidReadingGap = () => {
-		return Number(localAdminPref.defaultMeterReadingGap) < 0;
-	};
-
-	const invalidMeterErrors = () => {
-		return Number(localAdminPref.defaultMeterMaximumErrors) < 0
-			|| Number(localAdminPref.defaultMeterMaximumErrors) > MAX_ERRORS;
-	};
-
-	const invalidFileSizeLimit = () => {
-		return Number(localAdminPref.defaultFileSizeLimit) < 0;
-	};
-
-	const invalidWarningFileSize = () => {
-		return Number(localAdminPref.defaultWarningFileSize) < 0
-			|| Number(localAdminPref.defaultWarningFileSize) > Number(localAdminPref.defaultFileSizeLimit);
+		warningFileSize: (): boolean => Number(localAdminPref.defaultWarningFileSize) < 0
+			|| Number(localAdminPref.defaultWarningFileSize) > Number(localAdminPref.defaultFileSizeLimit)
 	};
 
 	return (
@@ -195,7 +184,7 @@ export default function PreferencesComponent() {
 					type='text'
 					value={localAdminPref.defaultMeterReadingFrequency}
 					onChange={e => makeLocalChanges('defaultMeterReadingFrequency', e.target.value)}
-					invalid={invalidReadingFreq()}
+					invalid={invalidFuncs.readingFreq()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="invalid.input" ></FormattedMessage>
@@ -212,7 +201,7 @@ export default function PreferencesComponent() {
 					min={MIN_VAL}
 					max={Number(localAdminPref.defaultMeterMaximumValue)}
 					maxLength={50}
-					invalid={invalidMinValue()}
+					invalid={invalidFuncs.minValue()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: MIN_VAL, max: Number(localAdminPref.defaultMeterMaximumValue) }}/>
@@ -229,7 +218,7 @@ export default function PreferencesComponent() {
 					min={Number(localAdminPref.defaultMeterMinimumValue)}
 					max={MAX_VAL}
 					maxLength={50}
-					invalid={invalidMaxValue()}
+					invalid={invalidFuncs.maxValue()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: Number(localAdminPref.defaultMeterMinimumValue), max: MAX_VAL }}/>
@@ -244,7 +233,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMinimumDate}
 					onChange={e => makeLocalChanges('defaultMeterMinimumDate', e.target.value)}
 					placeholder='YYYY-MM-DD HH:MM:SS'
-					invalid={invalidMinDate()}
+					invalid={invalidFuncs.minDate()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: MIN_DATE, max: moment(localAdminPref.defaultMeterMaximumDate).utc().format() }} />
@@ -259,7 +248,7 @@ export default function PreferencesComponent() {
 					value={localAdminPref.defaultMeterMaximumDate}
 					onChange={e => makeLocalChanges('defaultMeterMaximumDate', e.target.value)}
 					placeholder='YYYY-MM-DD HH:MM:SS'
-					invalid={invalidMaxDate()}
+					invalid={invalidFuncs.maxDate()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: moment(localAdminPref.defaultMeterMinimumDate).utc().format(), max: MAX_DATE }} />
@@ -275,7 +264,7 @@ export default function PreferencesComponent() {
 					onChange={e => makeLocalChanges('defaultMeterReadingGap', e.target.value)}
 					min='0'
 					maxLength={50}
-					invalid={invalidReadingGap()}
+					invalid={invalidFuncs.readingGap()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: 0, max: Infinity }}/>
@@ -292,7 +281,7 @@ export default function PreferencesComponent() {
 					min='0'
 					max={MAX_ERRORS}
 					maxLength={50}
-					invalid={invalidMeterErrors()}
+					invalid={invalidFuncs.meterErrors()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: 0, max: MAX_ERRORS }}/>
@@ -387,7 +376,7 @@ export default function PreferencesComponent() {
 					min='0'
 					max={Number(localAdminPref.defaultFileSizeLimit)}
 					maxLength={50}
-					invalid={invalidWarningFileSize()}
+					invalid={invalidFuncs.warningFileSize()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: 0, max: Number(localAdminPref.defaultFileSizeLimit) }}/>
@@ -403,7 +392,7 @@ export default function PreferencesComponent() {
 					onChange={e => makeLocalChanges('defaultFileSizeLimit', e.target.value)}
 					min={Number(localAdminPref.defaultWarningFileSize)}
 					maxLength={50}
-					invalid={invalidFileSizeLimit()}
+					invalid={invalidFuncs.fileSizeLimit()}
 				/>
 				<FormFeedback>
 					<FormattedMessage id="error.bounds" values={{ min: 0, max: Infinity }}/>
@@ -425,6 +414,7 @@ export default function PreferencesComponent() {
 					onClick={discardChanges}
 					disabled={!hasChanges}
 					style={{ marginRight: '20px' }}
+					color='secondary'
 				>
 					{translate('discard.changes')}
 				</Button>
@@ -440,9 +430,8 @@ export default function PreferencesComponent() {
 								showErrorNotification(translate('failed.to.submit.changes'));
 							})
 					}
-					disabled={!hasChanges || invalidReadingFreq() || invalidMinValue() || invalidMaxValue() || invalidMinDate() || invalidMaxDate()
-						|| invalidReadingGap() || invalidMeterErrors() || invalidFileSizeLimit() || invalidWarningFileSize()
-					}
+					disabled={!hasChanges || Object.values(invalidFuncs).some(check => check())}
+					color='primary'
 				>
 					{translate('submit')}
 				</Button>
