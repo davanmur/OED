@@ -3,6 +3,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # The OED Docker database container must be running for this script to work
 
 # Input the pathname for the desired backup directory
@@ -27,3 +28,5 @@ final_path="${db_dump_path}/dump_${date}.sql"
 
 # Perform the backup using pg_dump
 docker compose exec database pg_dump -U oed > "$final_path"
+
+echo "OED database backup placed in ${final_path}"
