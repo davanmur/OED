@@ -73,7 +73,7 @@ mocha.describe('readings API', () => {
 							graphicUnitId: unitId             // Unit ID for kWh
 						});
 				
-					expectCompareToEqualExpected(res, expected, GROUP_ID); // confirm results match with expected
+					expectCompareToEqualExpected(res, expected, GROUP_ID); // confirm the results match with expected results
 				});
 
 
