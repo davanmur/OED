@@ -85,16 +85,16 @@ mocha.describe('readings API', () => {
 					expectCompareToEqualExpected(res, expected);
 				});
 
-				mocha.it('C6: 28 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and quantity units & kWh as kWh', async () => {
+				mocha.it('C6: 28 day shift end 2022-10-31 17:12:34 (partial hour) for 15 minute reading intervals and quantity units & kWh as kWh', async () => {
 					await prepareTest(unitDatakWh, conversionDatakWh, meterDatakWh);
 					const unitId = await getUnitId('kWh');
 					const expected = [108269.924822581, 108889.847659507];
-					const res = await chai.request(app).get('/api/compareReadings/meters/${METER_ID}')
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
 						.query({
 							curr_start: '2022-10-09 00:00:00',
-							curr_end: '2022-10-31 17:00:00',
+							curr_end: '2022-10-31 17:12:34', 
 							shift: 'P28D',
-							graphicUnitID:unitId
+							graphicUnitId: unitId
 						});
 					expectCompareToEqualExpected(res, expected);
 				});
