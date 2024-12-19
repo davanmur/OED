@@ -58,8 +58,7 @@ mocha.describe('readings API', () => {
 
 				// Add CG5 here
 
-				// Add CG6 here
-				mocha.it('CG6: 28-day shift end 2022-10-31 17:12:34 for 15-minute reading intervals and quantity units & kWh as kWh', async () => { //test description
+				mocha.it('CG6: 28 day shift end 2022-10-31 17:12:34 (partial hour) for 15 minute reading intervals and quantity units & kWh as kWh', async () => { //test description
 					await prepareTest(unitDatakWh, conversionDatakWh, meterDatakWhGroups, groupDatakWh); // prepare test environment
 					// Get the unit ID since the DB could use any value.
 					const unitId = await getUnitId('kWh');
