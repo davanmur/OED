@@ -397,7 +397,7 @@ const LocaleTranslationData = {
 		"page.choice.login": "Page choices & login",
 		"page.choice.logout": "Page choices & logout",
 		"page.restart.button": "Restart OED session",
-		"page.user.refresh.directions": "If clicking the \"Return to Dashboard\" button does not work then please click the button below to restart your OED session\u{26A1}",
+		"page.user.refresh.directions": "If clicking the \"Return to Dashboard\" button does not work then please click the button below to restart your OED session",
 		"password": "Password: ",
 		"password.confirm": "Confirm password: ",
 		"per.day": "Per Day",
